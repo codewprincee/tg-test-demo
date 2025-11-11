@@ -3,7 +3,7 @@
  * Handles communication with the Express backend server
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://demoapi.trytouchbase.io';
 
 export interface StreamResponse {
   text?: string;
