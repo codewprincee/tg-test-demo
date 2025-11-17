@@ -77,10 +77,10 @@ export const authAPI = {
   ): Promise<APIResponse<{ user: { email: string; name: string; role: string }; token: string }>> => {
     return makeAPICall(
       () => {
-        if (email === "demo@app.com" && password === "demo123") {
+        if (email === "demo@trytouchbase.io" && password === "YCdemo2025") {
           return {
             user: {
-              email: "demo@app.com",
+              email: "emo@trytouchbase.io",
               name: "Demo User",
               role: "Admin",
             },
