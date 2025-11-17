@@ -41,16 +41,23 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   // Load conversations from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("chat_conversations")
-      if (saved) {
-        const loaded = JSON.parse(saved, (key, value) => {
-          if (key === "timestamp" || key === "createdAt" || key === "updatedAt") {
-            return new Date(value)
-          }
-          return value
-        })
-        setConversations(loaded)
-        // Don't auto-set current conversation - let URL handling do it
+      try {
+        const saved = localStorage.getItem("chat_conversations")
+        if (saved) {
+          const loaded = JSON.parse(saved, (key, value) => {
+            if (key === "timestamp" || key === "createdAt" || key === "updatedAt") {
+              return value ? new Date(value) : value
+            }
+            return value
+          })
+          setConversations(loaded || [])
+          // Don't auto-set current conversation - let URL handling do it
+        }
+      } catch (error) {
+        console.error("Error loading conversations from localStorage:", error)
+        // Clear corrupted data
+        localStorage.removeItem("chat_conversations")
+        setConversations([])
       }
     }
   }, [])

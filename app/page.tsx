@@ -16,6 +16,7 @@ import { useChatContext } from "@/lib/chat-context"
 import { parseResponseForVisualizations } from "@/lib/visualization-generator"
 import { ActionCards } from "@/components/action-cards"
 import { generateActionsFromContext, executeAction } from "@/lib/action-generator"
+import { DynamicVisualization } from "@/components/dynamic-visualization"
 import { cn } from "@/lib/utils"
 
 interface Message {
@@ -154,11 +155,8 @@ function ChatPageContent() {
         router.replace("/", { scroll: false })
         setCurrentConversationId(null)
       }
-    } else if (!currentConversationId && conversations.length > 0) {
-      const mostRecent = conversations[0]
-      setCurrentConversationId(mostRecent.id)
-      router.replace(`/?chat=${mostRecent.id}`, { scroll: false })
     }
+    // Removed auto-loading of most recent conversation - start fresh instead
   }, [conversations, searchParams, currentConversationId, router, setCurrentConversationId])
 
   // Update URL when currentConversationId changes
@@ -594,102 +592,67 @@ function ChatPageContent() {
         </div>
 
         {/* Right Side: Analytics Dashboard */}
-        {messages.length > 1 && showAnalyticsPanel && (
-          <div className="w-1/2 bg-white border-l border-slate-200 overflow-y-auto">
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-md">
-                    <BarChart3 className="h-5 w-5 text-white" />
+        {messages.length > 1 && showAnalyticsPanel && (() => {
+          // Get the latest assistant message with visualizations
+          const latestAssistantMessage = [...messages].reverse().find(m => m.role === "assistant" && m.visualizationData && m.visualizationData.length > 0)
+          const visualizations = latestAssistantMessage?.visualizationData || []
+
+          // Find metric visualization
+          const metricViz = visualizations.find((v: any) => v.type === "metric")
+
+          // Find other visualizations (bar, pie, line, table)
+          const otherViz = visualizations.filter((v: any) => v.type !== "metric")
+
+          return (
+            <div className="w-1/2 bg-white border-l border-slate-200 overflow-y-auto">
+              <div className="p-6">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center shadow-md">
+                      <BarChart3 className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-semibold text-slate-900">Performance Dashboard</h2>
+                      <p className="text-xs text-slate-500">Real-time analytics</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-slate-900">Performance Dashboard</h2>
-                    <p className="text-xs text-slate-500">Real-time campaign analytics</p>
-                  </div>
+                  <button
+                    onClick={() => setShowAnalyticsPanel(false)}
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-900"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6 6 18"/>
+                      <path d="m6 6 12 12"/>
+                    </svg>
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowAnalyticsPanel(false)}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-600 hover:text-slate-900"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 6 6 18"/>
-                    <path d="m6 6 12 12"/>
-                  </svg>
-                </button>
-              </div>
 
-              {/* Summary Stats */}
-              <div className="mb-8">
-                <h3 className="text-sm font-semibold text-slate-900 mb-4">Key Metrics</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {/* Total Ad Spend */}
-                  <div className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
-                    <p className="text-xs text-slate-600 mb-2 font-medium">Total Ad Spend</p>
-                    <div className="flex items-end justify-between">
-                      <span className="text-2xl font-bold text-slate-900">$12,500</span>
-                      <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
-                        ↑ 8%
-                      </span>
+                {/* Dynamic Key Metrics */}
+                {metricViz && (
+                  <div className="mb-8">
+                    <h3 className="text-sm font-semibold text-slate-900 mb-4">Key Metrics</h3>
+                    <div className="grid grid-cols-3 gap-4">
+                      {metricViz.data.slice(0, 6).map((metric: any, idx: number) => (
+                        <div key={idx} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
+                          <p className="text-xs text-slate-600 mb-2 font-medium">{metric.label}</p>
+                          <div className="flex items-end justify-between">
+                            <span className="text-2xl font-bold text-slate-900">
+                              {typeof metric.value === "number" ? metric.value.toLocaleString() : metric.value}
+                            </span>
+                            {metric.trend && (
+                              <span className={`text-sm font-semibold flex items-center gap-1 ${
+                                metric.trend === "up" ? "text-emerald-600" : metric.trend === "down" ? "text-red-600" : "text-slate-600"
+                              }`}>
+                                {metric.trend === "up" ? "↑" : metric.trend === "down" ? "↓" : "→"} {metric.trend}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-
-                  {/* Impressions */}
-                  <div className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
-                    <p className="text-xs text-slate-600 mb-2 font-medium">Impressions</p>
-                    <div className="flex items-end justify-between">
-                      <span className="text-2xl font-bold text-slate-900">1.2M</span>
-                      <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
-                        ↑ 8%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Clicks */}
-                  <div className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
-                    <p className="text-xs text-slate-600 mb-2 font-medium">Clicks</p>
-                    <div className="flex items-end justify-between">
-                      <span className="text-2xl font-bold text-slate-900">86,400</span>
-                      <span className="text-sm font-semibold text-red-600 flex items-center gap-1">
-                        ↓ 2.5%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* CTR */}
-                  <div className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
-                    <p className="text-xs text-slate-600 mb-2 font-medium">CTR</p>
-                    <div className="flex items-end justify-between">
-                      <span className="text-2xl font-bold text-slate-900">7.2%</span>
-                      <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
-                        ↑ 8%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Conversions */}
-                  <div className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
-                    <p className="text-xs text-slate-600 mb-2 font-medium">Conversions</p>
-                    <div className="flex items-end justify-between">
-                      <span className="text-2xl font-bold text-slate-900">4,320</span>
-                      <span className="text-sm font-semibold text-red-600 flex items-center gap-1">
-                        ↓ 2.5%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* ROAS */}
-                  <div className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white">
-                    <p className="text-xs text-slate-600 mb-2 font-medium">ROAS</p>
-                    <div className="flex items-end justify-between">
-                      <span className="text-2xl font-bold text-slate-900">3.8X</span>
-                      <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
-                        ↑ 8%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                )}
 
               {/* Visual Breakdown */}
               <div>
@@ -791,9 +754,20 @@ function ChatPageContent() {
                   </button>
                 </div>
               </div>
+
+              {/* Additional Dynamic Visualizations */}
+              {otherViz.length > 0 && (
+                <div className="mt-8 space-y-6">
+                  <h3 className="text-sm font-semibold text-slate-900 mb-4">Detailed Analytics</h3>
+                  {otherViz.map((viz: any) => (
+                    <DynamicVisualization key={viz.id} visualization={viz} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-        )}
+        )
+        })()}
       </div>
     </div>
   )

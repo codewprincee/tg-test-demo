@@ -7,6 +7,7 @@ import type { Action } from "@/components/action-cards"
 
 /**
  * Extract actions from AI response based on context and keywords
+ * Made more selective to only show when truly relevant
  */
 export function generateActionsFromContext(
   aiResponse: string,
@@ -16,11 +17,10 @@ export function generateActionsFromContext(
   const lowerResponse = aiResponse.toLowerCase()
   const lowerContext = conversationContext.toLowerCase()
 
-  // Campaign-related actions
+  // Campaign-related actions - only show if explicitly discussing optimization or underperformance
   if (
-    lowerResponse.includes("campaign") ||
-    lowerResponse.includes("ad") ||
-    lowerContext.includes("campaign")
+    (lowerResponse.includes("campaign") && (lowerResponse.includes("optimize") || lowerResponse.includes("budget"))) ||
+    (lowerResponse.includes("underperform") && lowerResponse.includes("ad"))
   ) {
     actions.push({
       id: "optimize-campaign",
@@ -78,11 +78,11 @@ export function generateActionsFromContext(
     })
   }
 
-  // Churn and customer retention actions
+  // Churn and customer retention actions - only show if explicitly discussing churn or at-risk customers
   if (
     lowerResponse.includes("churn") ||
-    lowerResponse.includes("retention") ||
-    lowerResponse.includes("customer")
+    (lowerResponse.includes("retention") && lowerResponse.includes("risk")) ||
+    lowerResponse.includes("at-risk")
   ) {
     actions.push({
       id: "create-retention-campaign",
@@ -129,11 +129,10 @@ export function generateActionsFromContext(
     })
   }
 
-  // Data and reporting actions
+  // Data and reporting actions - only show if explicitly discussing reports or data exports
   if (
-    lowerResponse.includes("data") ||
-    lowerResponse.includes("report") ||
-    lowerResponse.includes("analytics")
+    (lowerResponse.includes("report") && lowerResponse.includes("schedule")) ||
+    (lowerResponse.includes("export") && lowerResponse.includes("data"))
   ) {
     actions.push({
       id: "schedule-report",
@@ -187,10 +186,10 @@ export function generateActionsFromContext(
     })
   }
 
-  // If we have numeric data or metrics, offer alerting
+  // Only offer alerting if explicitly discussing alerts, thresholds, or monitoring
   if (
-    lowerResponse.match(/\d+(?:\.\d+)?%/) || // Has percentages
-    lowerResponse.match(/\$[\d,]+/) // Has currency
+    (lowerResponse.includes("alert") || lowerResponse.includes("monitor") || lowerResponse.includes("threshold")) &&
+    (lowerResponse.match(/\d+(?:\.\d+)?%/) || lowerResponse.match(/\$[\d,]+/))
   ) {
     actions.push({
       id: "create-alert",
@@ -234,8 +233,11 @@ export function generateActionsFromContext(
     })
   }
 
-  // Always offer export action
-  if (actions.length > 0) {
+  // Only offer export action if there's structured data in the response (tables, lists of accounts/customers)
+  if (
+    actions.length > 0 &&
+    (lowerResponse.includes("account") || lowerResponse.includes("customer") || lowerResponse.includes("|"))
+  ) {
     actions.push({
       id: "export-data",
       title: "Export Raw Data",

@@ -20,6 +20,7 @@ import {
   Hash,
   Trash2,
   LogOut,
+  Zap,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -36,6 +37,7 @@ import {
 
 const mainNavItems = [
   { name: "AI Chat", icon: Sparkles, href: "/" },
+  { name: "Actions", icon: Zap, href: "/actions" },
   { name: "Analytics", icon: BarChart3, href: "/analytics" },
   { name: "Settings", icon: Settings, href: "/settings" },
 ]

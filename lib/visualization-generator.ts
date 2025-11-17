@@ -144,13 +144,76 @@ export function extractDataFromResponse(text: string): ExtractedData {
     }
   }
 
-  // Extract time series (month names with values)
+  // Extract time series data with multiple patterns
+
+  // Pattern 1: Month names with values (Jan: 100, February 200)
   const monthRegex = /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s:]+(\d+(?:,\d{3})*(?:\.\d+)?)/gi
   let monthMatch
   while ((monthMatch = monthRegex.exec(text)) !== null) {
     extracted.timeSeries.push({
       date: monthMatch[1],
       value: parseFloat(monthMatch[2].replace(/,/g, "")),
+    })
+  }
+
+  // Pattern 2: Month-Year format (Jan 2024: 100, January 2024: 200)
+  const monthYearRegex = /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{4})[\s:]+(\d+(?:,\d{3})*(?:\.\d+)?)/gi
+  let monthYearMatch
+  while ((monthYearMatch = monthYearRegex.exec(text)) !== null) {
+    extracted.timeSeries.push({
+      date: `${monthYearMatch[1]} ${monthYearMatch[2]}`,
+      value: parseFloat(monthYearMatch[3].replace(/,/g, "")),
+    })
+  }
+
+  // Pattern 3: Quarter patterns (Q1 2024: 100, Quarter 1: 200)
+  const quarterRegex = /(?:Q|Quarter\s*)(\d)(?:\s+(\d{4}))?[\s:]+(\d+(?:,\d{3})*(?:\.\d+)?)/gi
+  let quarterMatch
+  while ((quarterMatch = quarterRegex.exec(text)) !== null) {
+    const quarter = `Q${quarterMatch[1]}${quarterMatch[2] ? ` ${quarterMatch[2]}` : ""}`
+    extracted.timeSeries.push({
+      date: quarter,
+      value: parseFloat(quarterMatch[3].replace(/,/g, "")),
+    })
+  }
+
+  // Pattern 4: Week patterns (Week 1: 100, W1: 200)
+  const weekRegex = /(?:Week\s*|W)(\d+)[\s:]+(\d+(?:,\d{3})*(?:\.\d+)?)/gi
+  let weekMatch
+  while ((weekMatch = weekRegex.exec(text)) !== null) {
+    extracted.timeSeries.push({
+      date: `Week ${weekMatch[1]}`,
+      value: parseFloat(weekMatch[2].replace(/,/g, "")),
+    })
+  }
+
+  // Pattern 5: Day of week (Monday: 100, Mon: 200)
+  const dayRegex = /(Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*[\s:]+(\d+(?:,\d{3})*(?:\.\d+)?)/gi
+  let dayMatch
+  while ((dayMatch = dayRegex.exec(text)) !== null) {
+    extracted.timeSeries.push({
+      date: dayMatch[1],
+      value: parseFloat(dayMatch[2].replace(/,/g, "")),
+    })
+  }
+
+  // Pattern 6: Year patterns (2024: 100, 2023: 200)
+  const yearRegex = /\b(20\d{2})[\s:]+(\d+(?:,\d{3})*(?:\.\d+)?)/gi
+  let yearMatch
+  while ((yearMatch = yearRegex.exec(text)) !== null) {
+    extracted.timeSeries.push({
+      date: yearMatch[1],
+      value: parseFloat(yearMatch[2].replace(/,/g, "")),
+    })
+  }
+
+  // Pattern 7: Full dates (2024-01-15, 01/15/2024, 15-01-2024)
+  const dateValueRegex = /(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4}|\d{2}-\d{2}-\d{4})[\s:]+(\d+(?:,\d{3})*(?:\.\d+)?)/gi
+  let dateValueMatch
+  while ((dateValueMatch = dateValueRegex.exec(text)) !== null) {
+    extracted.timeSeries.push({
+      date: dateValueMatch[1],
+      value: parseFloat(dateValueMatch[2].replace(/,/g, "")),
     })
   }
 
@@ -196,32 +259,80 @@ export function generateVisualizations(
           return obj
         })
 
-        // Create both bar and pie charts for table data
-        // Bar chart
-        visualizations.push({
-          id: `table-bar-${idx}-${Date.now()}`,
-          type: "bar",
-          title: `${table.headers[1]} by ${table.headers[0]} (Bar Chart)`,
-          data,
-          config: {
-            xKey: table.headers[0],
-            yKey: table.headers[1],
-            colors: ["#3b82f6"],
-          },
-        })
+        // Check if first column contains time-based data
+        const firstColumnSample = table.rows.map(row => row[0]).join(" ")
+        const isTimeSeries =
+          /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i.test(firstColumnSample) ||
+          /\b(Q|Quarter)\s*[1-4]/i.test(firstColumnSample) ||
+          /\b(Week|W)\s*\d+/i.test(firstColumnSample) ||
+          /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)/i.test(firstColumnSample) ||
+          /\b20\d{2}\b/.test(firstColumnSample) ||
+          /\d{4}-\d{2}-\d{2}/.test(firstColumnSample) ||
+          /\d{2}\/\d{2}\/\d{4}/.test(firstColumnSample)
 
-        // Pie chart (if not too many items)
-        if (table.rows.length <= 8) {
+        if (isTimeSeries) {
+          // For time series, create area and line charts
           visualizations.push({
-            id: `table-pie-${idx}-${Date.now()}`,
-            type: "pie",
-            title: `${table.headers[1]} by ${table.headers[0]} (Pie Chart)`,
+            id: `table-area-${idx}-${Date.now()}`,
+            type: "area",
+            title: `${table.headers[1]} Over Time (Area Chart)`,
             data,
             config: {
-              dataKey: table.headers[1],
-              colors: ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4"],
+              xKey: table.headers[0],
+              yKey: table.headers[1],
+              colors: ["#8b5cf6", "#ec4899", "#f59e0b"],
             },
           })
+
+          visualizations.push({
+            id: `table-line-${idx}-${Date.now()}`,
+            type: "line",
+            title: `${table.headers[1]} Trend (Line Chart)`,
+            data,
+            config: {
+              xKey: table.headers[0],
+              yKey: table.headers[1],
+              colors: ["#10b981", "#06b6d4", "#8b5cf6"],
+            },
+          })
+        } else {
+          // For non-time series, create bar chart
+          visualizations.push({
+            id: `table-bar-${idx}-${Date.now()}`,
+            type: "bar",
+            title: `${table.headers[1]} by ${table.headers[0]} (Bar Chart)`,
+            data,
+            config: {
+              xKey: table.headers[0],
+              yKey: table.headers[1],
+              colors: ["#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4"],
+            },
+          })
+        }
+
+        // Pie chart (if not too many items, data is balanced, and NOT time series)
+        if (!isTimeSeries && table.rows.length <= 8) {
+          // Check if data is too imbalanced (one value dominates >80%)
+          const total = table.rows.reduce((sum, row) => {
+            const val = parseFloat(row[1])
+            return sum + (isNaN(val) ? 0 : val)
+          }, 0)
+          const maxValue = Math.max(...table.rows.map(row => parseFloat(row[1]) || 0))
+          const maxPercentage = total > 0 ? (maxValue / total) * 100 : 0
+
+          // Only create pie chart if no single value dominates more than 80%
+          if (maxPercentage < 80) {
+            visualizations.push({
+              id: `table-pie-${idx}-${Date.now()}`,
+              type: "pie",
+              title: `${table.headers[1]} by ${table.headers[0]} (Pie Chart)`,
+              data,
+              config: {
+                dataKey: table.headers[1],
+                colors: ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4"],
+              },
+            })
+          }
         }
       }
 
@@ -244,19 +355,43 @@ export function generateVisualizations(
     }
   })
 
-  // Generate time series charts
+  // Generate time series charts (both area and line for better visualization)
   if (extracted.timeSeries.length > 1) {
-    visualizations.push({
-      id: `timeseries-${Date.now()}`,
-      type: "line",
-      title: "Trend Over Time",
-      data: extracted.timeSeries,
-      config: {
-        xKey: "date",
-        yKey: "value",
-        colors: ["#3b82f6"],
-      },
-    })
+    // Remove duplicates based on date
+    const uniqueTimeSeries = extracted.timeSeries.reduce((acc, curr) => {
+      if (!acc.find((item: any) => item.date === curr.date)) {
+        acc.push(curr)
+      }
+      return acc
+    }, [] as typeof extracted.timeSeries)
+
+    if (uniqueTimeSeries.length > 1) {
+      // Area chart for overall trend
+      visualizations.push({
+        id: `timeseries-area-${Date.now()}`,
+        type: "area",
+        title: "Time Series Overview (Area Chart)",
+        data: uniqueTimeSeries,
+        config: {
+          xKey: "date",
+          yKey: "value",
+          colors: ["#8b5cf6", "#ec4899", "#f59e0b"],
+        },
+      })
+
+      // Line chart for precise trends
+      visualizations.push({
+        id: `timeseries-line-${Date.now()}`,
+        type: "line",
+        title: "Time Series Trend (Line Chart)",
+        data: uniqueTimeSeries,
+        config: {
+          xKey: "date",
+          yKey: "value",
+          colors: ["#10b981", "#06b6d4", "#8b5cf6"],
+        },
+      })
+    }
   }
 
   // Generate charts from lists (if they contain numeric data)
@@ -299,8 +434,7 @@ export function generateVisualizations(
       .filter(Boolean) as { name: string; value: number }[]
 
     if (numericItems.length > 0 && numericItems.length < 10) {
-      // Create both bar and pie charts for comprehensive visualization
-      // Bar chart
+      // Create bar chart
       visualizations.push({
         id: `list-bar-${idx}-${Date.now()}`,
         type: "bar",
@@ -308,21 +442,28 @@ export function generateVisualizations(
         data: numericItems,
         config: {
           dataKey: "value",
-          colors: ["#3b82f6"],
+          colors: ["#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4"],
         },
       })
 
-      // Pie chart
-      visualizations.push({
-        id: `list-pie-${idx}-${Date.now()}`,
-        type: "pie",
-        title: "Data Breakdown (Pie Chart)",
-        data: numericItems,
-        config: {
-          dataKey: "value",
-          colors: ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4"],
-        },
-      })
+      // Pie chart only if data is balanced
+      const total = numericItems.reduce((sum, item) => sum + item.value, 0)
+      const maxValue = Math.max(...numericItems.map(item => item.value))
+      const maxPercentage = total > 0 ? (maxValue / total) * 100 : 0
+
+      // Only create pie chart if no single value dominates more than 80%
+      if (maxPercentage < 80) {
+        visualizations.push({
+          id: `list-pie-${idx}-${Date.now()}`,
+          type: "pie",
+          title: "Data Breakdown (Pie Chart)",
+          data: numericItems,
+          config: {
+            dataKey: "value",
+            colors: ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#06b6d4"],
+          },
+        })
+      }
     }
   })
 

@@ -37,12 +37,16 @@ export function DynamicVisualization({ visualization, className = "" }: DynamicV
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {data.slice(0, 6).map((metric: any, idx: number) => {
               // Use single blue color scheme for all metrics
-              const colorScheme = {
-                bg: "from-blue-50 to-white",
-                border: "border-blue-200",
-                text: "text-blue-700",
-                iconBg: "from-blue-500 to-blue-600"
-              }
+              // Use different color schemes based on index
+              const colorSchemes = [
+                { bg: "from-purple-50 to-white", border: "border-purple-200", text: "text-purple-700", iconBg: "from-purple-500 to-purple-600" },
+                { bg: "from-pink-50 to-white", border: "border-pink-200", text: "text-pink-700", iconBg: "from-pink-500 to-pink-600" },
+                { bg: "from-orange-50 to-white", border: "border-orange-200", text: "text-orange-700", iconBg: "from-orange-500 to-orange-600" },
+                { bg: "from-green-50 to-white", border: "border-green-200", text: "text-green-700", iconBg: "from-green-500 to-green-600" },
+                { bg: "from-cyan-50 to-white", border: "border-cyan-200", text: "text-cyan-700", iconBg: "from-cyan-500 to-cyan-600" },
+                { bg: "from-violet-50 to-white", border: "border-violet-200", text: "text-violet-700", iconBg: "from-violet-500 to-violet-600" },
+              ]
+              const colorScheme = colorSchemes[idx % colorSchemes.length]
 
               return (
                 <div
@@ -92,8 +96,8 @@ export function DynamicVisualization({ visualization, className = "" }: DynamicV
             <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
               <defs>
                 <linearGradient id={`barGradient-${visualization.id}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
-                  <stop offset="100%" stopColor="#1e40af" stopOpacity={0.95} />
+                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#7c3aed" stopOpacity={0.95} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
@@ -159,9 +163,9 @@ export function DynamicVisualization({ visualization, className = "" }: DynamicV
               <Line
                 type="monotone"
                 dataKey={config?.yKey || "value"}
-                stroke="#3b82f6"
+                stroke="#10b981"
                 strokeWidth={3}
-                dot={{ fill: "#3b82f6", r: 5, strokeWidth: 2, stroke: "#fff" }}
+                dot={{ fill: "#10b981", r: 5, strokeWidth: 2, stroke: "#fff" }}
                 activeDot={{ r: 7, strokeWidth: 2, stroke: "#fff" }}
               />
             </RechartsLineChart>
@@ -174,8 +178,8 @@ export function DynamicVisualization({ visualization, className = "" }: DynamicV
             <AreaChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <defs>
                 <linearGradient id={`areaGradient-${visualization.id}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
+                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
@@ -202,10 +206,10 @@ export function DynamicVisualization({ visualization, className = "" }: DynamicV
               <Area
                 type="monotone"
                 dataKey={config?.yKey || "value"}
-                stroke="#3b82f6"
+                stroke="#8b5cf6"
                 strokeWidth={3}
                 fill={`url(#areaGradient-${visualization.id})`}
-                dot={{ fill: "#3b82f6", r: 4 }}
+                dot={{ fill: "#8b5cf6", r: 4 }}
                 activeDot={{ r: 6 }}
               />
             </AreaChart>
@@ -214,21 +218,18 @@ export function DynamicVisualization({ visualization, className = "" }: DynamicV
 
       case "pie":
         return (
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={400}>
             <RechartsPieChart>
               <Pie
                 data={data}
                 cx="50%"
-                cy="50%"
-                labelLine={{
-                  stroke: "#64748b",
-                  strokeWidth: 2,
+                cy="45%"
+                labelLine={false}
+                label={({ percent }: any) => {
+                  // Only show percentage if > 5% to avoid clutter
+                  return percent > 0.05 ? `${(percent * 100).toFixed(1)}%` : ""
                 }}
-                label={({ name, percent }: any) => {
-                  const displayName = name || "Unknown"
-                  return `${displayName}: ${(percent * 100).toFixed(1)}%`
-                }}
-                outerRadius={110}
+                outerRadius={100}
                 innerRadius={60}
                 paddingAngle={2}
                 fill="#8884d8"
@@ -236,12 +237,12 @@ export function DynamicVisualization({ visualization, className = "" }: DynamicV
               >
                 {data.map((entry: any, index: number) => {
                   const colors = config?.colors || [
-                    "#3b82f6",
                     "#8b5cf6",
                     "#ec4899",
                     "#f59e0b",
                     "#10b981",
                     "#06b6d4",
+                    "#a855f7",
                   ]
                   return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                 })}
@@ -256,15 +257,28 @@ export function DynamicVisualization({ visualization, className = "" }: DynamicV
                 }}
                 formatter={(value: any, name: any, props: any) => {
                   const displayName = props.payload.name || name || "Value"
-                  return [value, displayName]
+                  return [value.toLocaleString(), displayName]
                 }}
               />
               <Legend
                 verticalAlign="bottom"
-                height={36}
-                formatter={(value: string) => (
-                  <span className="text-sm text-slate-700">{value}</span>
-                )}
+                height={80}
+                wrapperStyle={{
+                  paddingTop: "20px",
+                  maxWidth: "100%",
+                }}
+                formatter={(value: string) => {
+                  // Truncate long labels for legend
+                  const maxLength = 35
+                  if (value.length > maxLength) {
+                    return (
+                      <span className="text-xs text-slate-700" title={value}>
+                        {value.substring(0, maxLength)}...
+                      </span>
+                    )
+                  }
+                  return <span className="text-xs text-slate-700">{value}</span>
+                }}
               />
             </RechartsPieChart>
           </ResponsiveContainer>
@@ -311,7 +325,7 @@ export function DynamicVisualization({ visualization, className = "" }: DynamicV
   return (
     <div className={`p-6 bg-white rounded-xl border border-slate-200 shadow-lg hover:shadow-xl transition-all ${className}`}>
       <div className="flex items-center gap-2 mb-5">
-        <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full" />
+        <div className="w-1 h-6 bg-gradient-to-b from-purple-500 to-purple-600 rounded-full" />
         <h3 className="text-base font-bold text-slate-900">{title}</h3>
       </div>
       {renderVisualization}
