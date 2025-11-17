@@ -80,7 +80,7 @@ export const authAPI = {
         if (email === "demo@trytouchbase.io" && password === "YCdemo2025") {
           return {
             user: {
-              email: "emo@trytouchbase.io",
+              email: "demo@trytouchbase.io",
               name: "Demo User",
               role: "Admin",
             },

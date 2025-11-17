@@ -105,8 +105,8 @@ export default function LoginPage() {
             <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
               <p className="text-xs font-semibold text-blue-900 mb-1.5">Demo Credentials:</p>
               <div className="space-y-0.5 text-xs text-blue-800">
-                <p><span className="font-medium">Email:</span> demo@app.com</p>
-                <p><span className="font-medium">Password:</span> demo123</p>
+                <p><span className="font-medium">Email:</span> demo@trytouchbase.io</p>
+                <p><span className="font-medium">Password:</span> YCdemo2025</p>
               </div>
             </div>
 

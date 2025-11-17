@@ -21,8 +21,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 const DEMO_USER = {
-  email: "demo@app.com",
-  password: "demo123",
+  email: "demo@trytouchbase.io",
+  password: "YCdemo2025",
   name: "Demo User",
   role: "Admin",
 }
