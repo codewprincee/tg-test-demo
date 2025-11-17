@@ -4,73 +4,73 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Port.io inspired color system - Light mode */
+  /* Clean White & Black Theme */
   /* Backgrounds */
-  --background: oklch(0.99 0 0); /* #f8fafc - Light gray background */
-  --foreground: oklch(0.2 0.01 265); /* #1a1f36 - Navy text */
+  --background: oklch(1 0 0); /* Pure white */
+  --foreground: oklch(0.15 0 0); /* Near black */
 
   /* Cards & Surfaces */
   --card: oklch(1 0 0); /* White cards */
-  --card-foreground: oklch(0.2 0.01 265);
+  --card-foreground: oklch(0.15 0 0); /* Black text */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.01 265);
+  --popover-foreground: oklch(0.15 0 0);
 
-  /* Primary - Deep Navy Blue */
-  --primary: oklch(0.25 0.03 265); /* #1e293b - Navy */
-  --primary-foreground: oklch(0.99 0 0);
+  /* Primary - Black */
+  --primary: oklch(0.15 0 0); /* Near black */
+  --primary-foreground: oklch(1 0 0); /* White */
 
-  /* Secondary - Light Purple/Blue */
-  --secondary: oklch(0.96 0.01 265); /* Light blue-gray */
-  --secondary-foreground: oklch(0.25 0.03 265);
+  /* Secondary - Light Gray */
+  --secondary: oklch(0.97 0 0); /* Very light gray */
+  --secondary-foreground: oklch(0.15 0 0);
 
-  /* Accent - Vibrant Blue */
-  --accent: oklch(0.55 0.18 250); /* #3b82f6 - Blue */
-  --accent-foreground: oklch(0.99 0 0);
+  /* Accent - Dark Gray */
+  --accent: oklch(0.3 0 0); /* Dark gray */
+  --accent-foreground: oklch(1 0 0);
 
   /* Muted */
-  --muted: oklch(0.97 0.005 265); /* #f1f5f9 */
-  --muted-foreground: oklch(0.5 0.01 265); /* #64748b */
+  --muted: oklch(0.96 0 0); /* Light gray */
+  --muted-foreground: oklch(0.5 0 0); /* Medium gray */
 
-  /* Destructive - Red */
-  --destructive: oklch(0.55 0.22 25); /* #ef4444 */
-  --destructive-foreground: oklch(0.99 0 0);
+  /* Destructive - Black/Red */
+  --destructive: oklch(0.45 0.22 25); /* Dark red */
+  --destructive-foreground: oklch(1 0 0);
 
-  /* Success - Green */
-  --success: oklch(0.65 0.18 155); /* #10b981 */
-  --success-foreground: oklch(0.99 0 0);
+  /* Success - Dark Gray/Green */
+  --success: oklch(0.5 0.15 155); /* Dark green */
+  --success-foreground: oklch(1 0 0);
 
-  /* Warning - Amber */
-  --warning: oklch(0.72 0.18 75); /* #f59e0b */
-  --warning-foreground: oklch(0.2 0.01 265);
+  /* Warning - Medium Gray/Amber */
+  --warning: oklch(0.55 0.15 75); /* Dark amber */
+  --warning-foreground: oklch(1 0 0);
 
   /* Purple accent */
-  --purple: oklch(0.55 0.25 290); /* #7c3aed - Purple */
-  --purple-foreground: oklch(0.99 0 0);
+  --purple: oklch(0.45 0.2 290); /* Dark purple */
+  --purple-foreground: oklch(1 0 0);
 
   /* Border & Input */
-  --border: oklch(0.9 0.005 265); /* #e2e8f0 */
-  --input: oklch(0.95 0.005 265);
-  --ring: oklch(0.55 0.18 250); /* Blue focus ring */
+  --border: oklch(0.9 0 0); /* Light gray border */
+  --input: oklch(0.98 0 0); /* Very light gray input */
+  --ring: oklch(0.15 0 0); /* Black focus ring */
 
-  /* Chart colors - Professional data visualization palette */
-  --chart-1: oklch(0.55 0.18 250); /* Blue */
-  --chart-2: oklch(0.55 0.25 290); /* Purple */
-  --chart-3: oklch(0.65 0.18 155); /* Green */
-  --chart-4: oklch(0.72 0.18 75); /* Amber */
-  --chart-5: oklch(0.6 0.2 330); /* Pink */
+  /* Chart colors - Monochrome palette */
+  --chart-1: oklch(0.2 0 0); /* Very dark gray */
+  --chart-2: oklch(0.35 0 0); /* Dark gray */
+  --chart-3: oklch(0.5 0 0); /* Medium gray */
+  --chart-4: oklch(0.65 0 0); /* Light gray */
+  --chart-5: oklch(0.8 0 0); /* Very light gray */
 
   /* Border radius */
   --radius: 0.5rem;
 
-  /* Sidebar - Navy theme */
-  --sidebar: oklch(0.18 0.03 265); /* #1a1f36 - Dark navy */
-  --sidebar-foreground: oklch(0.85 0.01 265); /* Light gray text */
-  --sidebar-primary: oklch(0.55 0.18 250); /* Blue for active items */
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.25 0.03 265); /* Hover state */
-  --sidebar-accent-foreground: oklch(0.99 0 0);
-  --sidebar-border: oklch(0.25 0.03 265);
-  --sidebar-ring: oklch(0.55 0.18 250);
+  /* Sidebar - White theme */
+  --sidebar: oklch(1 0 0); /* White sidebar */
+  --sidebar-foreground: oklch(0.15 0 0); /* Black text */
+  --sidebar-primary: oklch(0.15 0 0); /* Black for active items */
+  --sidebar-primary-foreground: oklch(1 0 0); /* White text on black */
+  --sidebar-accent: oklch(0.96 0 0); /* Light gray hover state */
+  --sidebar-accent-foreground: oklch(0.15 0 0); /* Black text */
+  --sidebar-border: oklch(0.9 0 0); /* Light gray border */
+  --sidebar-ring: oklch(0.15 0 0); /* Black ring */
 }
 
 .dark {

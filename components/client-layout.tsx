@@ -64,9 +64,10 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     }
 
     const handleNewChat = () => {
+      // Clear conversation ID first
+      setCurrentConversationId(null)
       // Navigate to chat page without conversation ID (new chat)
       router.push("/")
-      setCurrentConversationId(null)
       // On mobile, close sidebar after selection
       if (window.innerWidth < 1024) {
         setIsSidebarOpen(false)

@@ -4,11 +4,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Lock, Mail, User } from "lucide-react"
+import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, Zap, User } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function SignupPage() {
   const { signup } = useAuth()
@@ -16,47 +15,24 @@ export default function SignupPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [acceptTerms, setAcceptTerms] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
-
-  const validateForm = () => {
-    const errors: Record<string, string> = {}
-
-    if (!name.trim()) {
-      errors.name = "Name is required"
-    }
-
-    if (!email.trim()) {
-      errors.email = "Email is required"
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = "Invalid email format"
-    }
-
-    if (!password) {
-      errors.password = "Password is required"
-    } else if (password.length < 6) {
-      errors.password = "Password must be at least 6 characters"
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])/.test(password)) {
-      errors.password = "Password must contain uppercase and lowercase letters"
-    } else if (!/(?=.*\d)/.test(password)) {
-      errors.password = "Password must contain at least one number"
-    }
-
-    if (password !== confirmPassword) {
-      errors.confirmPassword = "Passwords do not match"
-    }
-
-    setValidationErrors(errors)
-    return Object.keys(errors).length === 0
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
-    setValidationErrors({})
 
-    if (!validateForm()) {
+    // Validation
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+
+    if (!acceptTerms) {
+      setError("Please accept the terms and conditions")
       return
     }
 
@@ -72,151 +48,302 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Create Account</h1>
-          <p className="text-slate-600">Sign up to get started with your dashboard</p>
-        </div>
+    <div className="min-h-screen flex">
+      {/* Left Side - Signup Form */}
+      <div className="w-1/2 bg-white flex items-center justify-center p-12">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <div className="flex items-center gap-2 mb-12">
+            <img src="https://framerusercontent.com/images/0rzMKrHH7K3WJ8uEDEJCXL5lco.svg?width=317&height=68" alt="" />
+          </div>
 
-        <Card className="border-slate-200 shadow-sm">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-semibold">Sign Up</CardTitle>
-            <CardDescription>Create your account to continue</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">
-                  Full Name
-                </Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="John Doe"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    className={`pl-10 border-slate-200 focus:border-slate-700 focus:ring-slate-700 ${
-                      validationErrors.name ? "border-red-500" : ""
-                    }`}
-                  />
-                </div>
-                {validationErrors.name && <p className="text-xs text-red-600">{validationErrors.name}</p>}
+          {/* Title */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Create your Account</h1>
+            <p className="text-slate-600">Get started with your free account today</p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name Input */}
+            <div>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="Full Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-11 h-12 bg-slate-50 border-slate-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                />
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    className={`pl-10 border-slate-200 focus:border-slate-700 focus:ring-slate-700 ${
-                      validationErrors.email ? "border-red-500" : ""
-                    }`}
-                  />
-                </div>
-                {validationErrors.email && <p className="text-xs text-red-600">{validationErrors.email}</p>}
+            {/* Email Input */}
+            <div>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-11 h-12 bg-slate-50 border-slate-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                />
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Create a strong password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    className={`pl-10 border-slate-200 focus:border-slate-700 focus:ring-slate-700 ${
-                      validationErrors.password ? "border-red-500" : ""
-                    }`}
-                  />
-                </div>
-                {validationErrors.password && <p className="text-xs text-red-600">{validationErrors.password}</p>}
+            {/* Password Input */}
+            <div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-11 pr-11 h-12 bg-slate-50 border-slate-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium">
-                  Confirm Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    className={`pl-10 border-slate-200 focus:border-slate-700 focus:ring-slate-700 ${
-                      validationErrors.confirmPassword ? "border-red-500" : ""
-                    }`}
-                  />
-                </div>
-                {validationErrors.confirmPassword && (
-                  <p className="text-xs text-red-600">{validationErrors.confirmPassword}</p>
-                )}
+            {/* Confirm Password Input */}
+            <div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className="pl-11 pr-11 h-12 bg-slate-50 border-slate-200 rounded-lg focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
+            </div>
 
-              {error && (
-                <Alert variant="destructive" className="border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-900">{error}</AlertDescription>
-                </Alert>
-              )}
+            {/* Error Alert */}
+            {error && (
+              <Alert variant="destructive" className="border-red-200 bg-red-50">
+                <AlertDescription className="text-red-900 text-sm">{error}</AlertDescription>
+              </Alert>
+            )}
 
-              <div className="bg-slate-100 border border-slate-200 rounded-lg p-3">
-                <p className="text-xs text-slate-600">
-                  Password must contain at least 6 characters, including uppercase, lowercase, and numbers.
-                </p>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-slate-700 hover:bg-slate-800 text-white"
-                disabled={isLoading}
+            {/* Terms & Conditions */}
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="terms"
+                checked={acceptTerms}
+                onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+                className="mt-0.5 border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+              />
+              <label
+                htmlFor="terms"
+                className="text-sm text-slate-700 cursor-pointer select-none leading-relaxed"
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  "Create Account"
-                )}
-              </Button>
-            </form>
-          </CardContent>
-          <CardFooter className="flex justify-center border-t border-slate-200 pt-6">
-            <p className="text-sm text-slate-600">
+                I agree to the{" "}
+                <Link href="/terms" className="text-blue-600 hover:text-blue-700 font-medium">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="text-blue-600 hover:text-blue-700 font-medium">
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+
+            {/* Signup Button */}
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                "Create Account"
+              )}
+            </Button>
+
+            {/* Login Link */}
+            <p className="text-center text-sm text-slate-600">
               Already have an account?{" "}
-              <Link href="/login" className="font-medium text-slate-700 hover:text-slate-900 underline">
+              <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
                 Sign in
               </Link>
             </p>
-          </CardFooter>
-        </Card>
+          </form>
+        </div>
+      </div>
 
-        <p className="text-center text-xs text-slate-500 mt-8">
-          By creating an account, you agree to our Terms of Service and Privacy Policy
-        </p>
+      {/* Right Side - Marketing/Illustration */}
+      <div className="w-1/2 bg-blue-600 flex items-center justify-center p-12 relative overflow-hidden">
+        {/* Decorative circles */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-500 opacity-30"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] rounded-full bg-blue-400 opacity-20"></div>
+
+        <div className="relative z-10 text-center max-w-lg">
+          {/* Illustration */}
+          <div className="mb-16 relative">
+            {/* Main illustration container */}
+            <div className="relative mx-auto" style={{ width: '420px', height: '400px' }}>
+              {/* Intelligence Dashboard Mockup */}
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 w-96 bg-white rounded-xl shadow-2xl overflow-hidden">
+                {/* Browser header */}
+                <div className="bg-slate-100 px-4 py-2.5 flex items-center gap-1.5 border-b border-slate-200">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                </div>
+
+                {/* Dashboard Header */}
+                <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-blue-600" />
+                      <span className="text-xs font-semibold text-slate-900">Customer Intelligence OS</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                      <span className="text-xs text-slate-600">Live</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dashboard Content */}
+                <div className="p-4 space-y-3">
+                  {/* Churn Alert */}
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold text-red-900">High Churn Risk</span>
+                          <span className="text-xs font-bold text-red-700">85%</span>
+                        </div>
+                        <p className="text-xs text-red-800">Acme Corp - Usage drop 40%</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Warning Alert */}
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                        <Zap className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold text-orange-900">Action Required</span>
+                          <span className="text-xs font-bold text-orange-700">62%</span>
+                        </div>
+                        <p className="text-xs text-orange-800">TechStart Inc - API errors ↑</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Healthy Status */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold text-green-900">Healthy</span>
+                          <span className="text-xs font-bold text-green-700">98%</span>
+                        </div>
+                        <p className="text-xs text-green-800">GlobalSoft - Strong engagement</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* AI Insight Box */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-semibold text-blue-900 mb-1">AI Insight</p>
+                        <p className="text-xs text-blue-800 leading-relaxed">
+                          3 accounts showing early warning signals. Intervention recommended within 48h.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating metric cards */}
+              <div className="absolute bottom-8 left-4 w-32 bg-white rounded-lg shadow-xl p-3 border border-slate-200">
+                <div className="text-xs text-slate-600 mb-1">Churn Prevention</div>
+                <div className="text-2xl font-bold text-green-600">94%</div>
+                <div className="text-xs text-green-600 font-medium">↑ 12% this month</div>
+              </div>
+
+              <div className="absolute bottom-24 right-4 w-32 bg-white rounded-lg shadow-xl p-3 border border-slate-200">
+                <div className="text-xs text-slate-600 mb-1">Active Signals</div>
+                <div className="text-2xl font-bold text-blue-600">1,247</div>
+                <div className="text-xs text-blue-600 font-medium">Real-time</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Text content */}
+          <div className="space-y-5 px-4">
+            <h2 className="text-3xl font-bold text-white leading-tight">
+              World's First Customer Intelligence OS. With AI.
+            </h2>
+            <p className="text-base text-blue-100 leading-relaxed">
+              We are building the first real-time Customer Intelligence OS that unifies fragmented signals
+              into actionable early warnings and guided interventions before your customers churn.
+            </p>
+          </div>
+
+          {/* Pagination dots */}
+          <div className="flex items-center justify-center gap-2 mt-10">
+            <div className="w-2 h-2 rounded-full bg-white"></div>
+            <div className="w-2 h-2 rounded-full bg-white opacity-40"></div>
+            <div className="w-2 h-2 rounded-full bg-white opacity-40"></div>
+          </div>
+        </div>
       </div>
     </div>
   )

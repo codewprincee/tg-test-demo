@@ -793,6 +793,588 @@ export default function AnalyticsPage() {
                 </CardContent>
               </Card>
 
+              {/* New Visualization: Donut Chart for Revenue Sources */}
+              <Card className="border border-border bg-card hover:shadow-sm transition-shadow">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <PieChart className="h-4 w-4 text-[#FF6B47]" />
+                    Revenue Sources Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between gap-8">
+                    {/* Donut Chart */}
+                    <div className="relative w-48 h-48 flex-shrink-0">
+                      <svg className="transform -rotate-90 w-48 h-48">
+                        {/* Background circle */}
+                        <circle
+                          cx="96"
+                          cy="96"
+                          r="80"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="32"
+                          className="text-muted/10"
+                        />
+                        {/* Subscriptions - 45% */}
+                        <circle
+                          cx="96"
+                          cy="96"
+                          r="80"
+                          fill="none"
+                          stroke="#FF6B47"
+                          strokeWidth="32"
+                          strokeDasharray={`${2 * Math.PI * 80 * 0.45} ${2 * Math.PI * 80}`}
+                          strokeLinecap="round"
+                        />
+                        {/* Professional Services - 30% */}
+                        <circle
+                          cx="96"
+                          cy="96"
+                          r="80"
+                          fill="none"
+                          stroke="#10B981"
+                          strokeWidth="32"
+                          strokeDasharray={`${2 * Math.PI * 80 * 0.30} ${2 * Math.PI * 80}`}
+                          strokeDashoffset={`${-2 * Math.PI * 80 * 0.45}`}
+                          strokeLinecap="round"
+                        />
+                        {/* Add-ons - 15% */}
+                        <circle
+                          cx="96"
+                          cy="96"
+                          r="80"
+                          fill="none"
+                          stroke="#7c3aed"
+                          strokeWidth="32"
+                          strokeDasharray={`${2 * Math.PI * 80 * 0.15} ${2 * Math.PI * 80}`}
+                          strokeDashoffset={`${-2 * Math.PI * 80 * 0.75}`}
+                          strokeLinecap="round"
+                        />
+                        {/* Other - 10% */}
+                        <circle
+                          cx="96"
+                          cy="96"
+                          r="80"
+                          fill="none"
+                          stroke="#F59E0B"
+                          strokeWidth="32"
+                          strokeDasharray={`${2 * Math.PI * 80 * 0.10} ${2 * Math.PI * 80}`}
+                          strokeDashoffset={`${-2 * Math.PI * 80 * 0.90}`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center flex-col">
+                        <div className="text-3xl font-bold text-foreground">${(totalMRR / 1000).toFixed(0)}K</div>
+                        <div className="text-xs text-muted-foreground">Total MRR</div>
+                      </div>
+                    </div>
+
+                    {/* Legend */}
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/30 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-[#FF6B47] rounded-sm" />
+                          <span className="text-sm font-medium text-foreground">Subscriptions</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-bold text-foreground">45%</div>
+                          <div className="text-xs text-muted-foreground">${((totalMRR * 0.45) / 1000).toFixed(1)}K</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/30 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-[#10B981] rounded-sm" />
+                          <span className="text-sm font-medium text-foreground">Professional Services</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-bold text-foreground">30%</div>
+                          <div className="text-xs text-muted-foreground">${((totalMRR * 0.30) / 1000).toFixed(1)}K</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/30 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-[#7c3aed] rounded-sm" />
+                          <span className="text-sm font-medium text-foreground">Add-ons</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-bold text-foreground">15%</div>
+                          <div className="text-xs text-muted-foreground">${((totalMRR * 0.15) / 1000).toFixed(1)}K</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/30 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 bg-[#F59E0B] rounded-sm" />
+                          <span className="text-sm font-medium text-foreground">Other</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-bold text-foreground">10%</div>
+                          <div className="text-xs text-muted-foreground">${((totalMRR * 0.10) / 1000).toFixed(1)}K</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* New Visualization: Area Chart for User Engagement */}
+              <Card className="border border-border bg-card hover:shadow-sm transition-shadow">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-[#FF6B47]" />
+                    User Engagement Trends
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Stats */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="text-center p-2 bg-[#FF6B47]/10 rounded-lg">
+                        <div className="text-xl font-bold text-[#FF6B47]">87%</div>
+                        <div className="text-xs text-muted-foreground mt-1">Active Rate</div>
+                      </div>
+                      <div className="text-center p-2 bg-[#10B981]/10 rounded-lg">
+                        <div className="text-xl font-bold text-[#10B981]">+12%</div>
+                        <div className="text-xs text-muted-foreground mt-1">Growth</div>
+                      </div>
+                      <div className="text-center p-2 bg-[#7c3aed]/10 rounded-lg">
+                        <div className="text-xl font-bold text-[#7c3aed]">3.2K</div>
+                        <div className="text-xs text-muted-foreground mt-1">Daily Users</div>
+                      </div>
+                    </div>
+
+                    {/* Stacked Area Chart */}
+                    <div className="relative h-40">
+                      <svg className="w-full h-full" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="areaGradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#FF6B47" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#FF6B47" stopOpacity="0.05" />
+                          </linearGradient>
+                          <linearGradient id="areaGradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#10B981" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#10B981" stopOpacity="0.05" />
+                          </linearGradient>
+                        </defs>
+
+                        {/* Grid lines */}
+                        {[0, 25, 50, 75, 100].map((percent) => (
+                          <line
+                            key={percent}
+                            x1="0"
+                            y1={`${percent}%`}
+                            x2="100%"
+                            y2={`${percent}%`}
+                            stroke="currentColor"
+                            strokeOpacity="0.1"
+                            strokeWidth="1"
+                          />
+                        ))}
+
+                        {/* Area 1 - Active Users */}
+                        <path
+                          d="M 0,60 L 16.67,50 L 33.33,55 L 50,45 L 66.67,40 L 83.33,35 L 100,30 L 100,100 L 0,100 Z"
+                          fill="url(#areaGradient1)"
+                        />
+                        <polyline
+                          points="0,60 16.67,50 33.33,55 50,45 66.67,40 83.33,35 100,30"
+                          fill="none"
+                          stroke="#FF6B47"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+
+                        {/* Area 2 - New Users */}
+                        <path
+                          d="M 0,80 L 16.67,75 L 33.33,78 L 50,70 L 66.67,68 L 83.33,65 L 100,60 L 100,100 L 0,100 Z"
+                          fill="url(#areaGradient2)"
+                        />
+                        <polyline
+                          points="0,80 16.67,75 33.33,78 50,70 66.67,68 83.33,65 100,60"
+                          fill="none"
+                          stroke="#10B981"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+
+                      {/* X-axis labels */}
+                      <div className="flex justify-between mt-2">
+                        <span className="text-xs text-muted-foreground">Mon</span>
+                        <span className="text-xs text-muted-foreground">Tue</span>
+                        <span className="text-xs text-muted-foreground">Wed</span>
+                        <span className="text-xs text-muted-foreground">Thu</span>
+                        <span className="text-xs text-muted-foreground">Fri</span>
+                        <span className="text-xs text-muted-foreground">Sat</span>
+                        <span className="text-xs text-muted-foreground">Sun</span>
+                      </div>
+                    </div>
+
+                    {/* Legend */}
+                    <div className="flex justify-center gap-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-[#FF6B47] rounded-full" />
+                        <span className="text-xs font-medium text-foreground">Active Users</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-[#10B981] rounded-full" />
+                        <span className="text-xs font-medium text-foreground">New Users</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* New Visualization: Funnel Chart for Conversion */}
+              <Card className="border border-border bg-card hover:shadow-sm transition-shadow">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <ArrowUpRight className="h-4 w-4 text-[#FF6B47]" />
+                    Conversion Funnel
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { stage: 'Visitors', count: 10000, percentage: 100, color: '#FF6B47' },
+                      { stage: 'Sign Ups', count: 3200, percentage: 32, color: '#FF8A6B' },
+                      { stage: 'Trial Started', count: 2400, percentage: 24, color: '#FFA58F' },
+                      { stage: 'Active Users', count: 1800, percentage: 18, color: '#FFC0B3' },
+                      { stage: 'Paid Customers', count: 890, percentage: 8.9, color: '#10B981' }
+                    ].map((item, idx) => (
+                      <div key={idx} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-foreground">{item.stage}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-muted-foreground">{item.count.toLocaleString()}</span>
+                            <span className="font-semibold text-foreground w-12 text-right">{item.percentage}%</span>
+                          </div>
+                        </div>
+                        <div className="relative h-12 rounded-lg overflow-hidden" style={{
+                          width: `${item.percentage}%`,
+                          backgroundColor: item.color,
+                          marginLeft: 'auto',
+                          marginRight: 'auto'
+                        }}>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-xs font-semibold text-white">
+                              {idx > 0 && `${((item.count / [10000, 3200, 2400, 1800][idx - 1]) * 100).toFixed(0)}% conversion`}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Overall Conversion Rate</span>
+                      <span className="text-lg font-bold text-[#10B981]">8.9%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* New Visualization: Radar Chart for Product Metrics */}
+              <Card className="border border-border bg-card hover:shadow-sm transition-shadow">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-[#FF6B47]" />
+                    Product Performance Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-center">
+                    <div className="relative w-64 h-64">
+                      <svg viewBox="0 0 200 200" className="w-full h-full">
+                        {/* Grid circles */}
+                        {[20, 40, 60, 80, 100].map((radius, idx) => (
+                          <circle
+                            key={idx}
+                            cx="100"
+                            cy="100"
+                            r={radius}
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1"
+                            className="text-muted/20"
+                          />
+                        ))}
+
+                        {/* Grid lines */}
+                        {[0, 60, 120, 180, 240, 300].map((angle, idx) => {
+                          const x = 100 + 100 * Math.cos((angle - 90) * Math.PI / 180)
+                          const y = 100 + 100 * Math.sin((angle - 90) * Math.PI / 180)
+                          return (
+                            <line
+                              key={idx}
+                              x1="100"
+                              y1="100"
+                              x2={x}
+                              y2={y}
+                              stroke="currentColor"
+                              strokeWidth="1"
+                              className="text-muted/20"
+                            />
+                          )
+                        })}
+
+                        {/* Data polygon */}
+                        <defs>
+                          <linearGradient id="radarGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#FF6B47" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#FF6B47" stopOpacity="0.1" />
+                          </linearGradient>
+                        </defs>
+
+                        {(() => {
+                          const values = [85, 72, 90, 68, 78, 82] // Performance, Reliability, UX, Speed, Features, Support
+                          const points = values.map((value, idx) => {
+                            const angle = (idx * 60 - 90) * Math.PI / 180
+                            const x = 100 + value * Math.cos(angle)
+                            const y = 100 + value * Math.sin(angle)
+                            return `${x},${y}`
+                          }).join(' ')
+
+                          return (
+                            <>
+                              <polygon
+                                points={points}
+                                fill="url(#radarGradient)"
+                                stroke="#FF6B47"
+                                strokeWidth="2.5"
+                              />
+                              {values.map((value, idx) => {
+                                const angle = (idx * 60 - 90) * Math.PI / 180
+                                const x = 100 + value * Math.cos(angle)
+                                const y = 100 + value * Math.sin(angle)
+                                return (
+                                  <circle
+                                    key={idx}
+                                    cx={x}
+                                    cy={y}
+                                    r="4"
+                                    fill="#FF6B47"
+                                    className="cursor-pointer hover:r-6 transition-all"
+                                  >
+                                    <title>{['Performance', 'Reliability', 'UX', 'Speed', 'Features', 'Support'][idx]}: {value}%</title>
+                                  </circle>
+                                )
+                              })}
+                            </>
+                          )
+                        })()}
+
+                        {/* Labels */}
+                        <text x="100" y="10" textAnchor="middle" className="text-xs fill-current text-foreground font-medium">Performance</text>
+                        <text x="187" y="60" textAnchor="start" className="text-xs fill-current text-foreground font-medium">Reliability</text>
+                        <text x="187" y="145" textAnchor="start" className="text-xs fill-current text-foreground font-medium">UX</text>
+                        <text x="100" y="195" textAnchor="middle" className="text-xs fill-current text-foreground font-medium">Speed</text>
+                        <text x="13" y="145" textAnchor="end" className="text-xs fill-current text-foreground font-medium">Features</text>
+                        <text x="13" y="60" textAnchor="end" className="text-xs fill-current text-foreground font-medium">Support</text>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-4">
+                    {[
+                      { label: 'Performance', value: 85, color: '#FF6B47' },
+                      { label: 'Reliability', value: 72, color: '#10B981' },
+                      { label: 'UX', value: 90, color: '#7c3aed' },
+                      { label: 'Speed', value: 68, color: '#F59E0B' },
+                      { label: 'Features', value: 78, color: '#EF4444' },
+                      { label: 'Support', value: 82, color: '#06B6D4' }
+                    ].map((metric, idx) => (
+                      <div key={idx} className="text-center p-2 bg-muted/30 rounded-lg">
+                        <div className="text-xs text-muted-foreground mb-1">{metric.label}</div>
+                        <div className="text-lg font-bold" style={{ color: metric.color }}>{metric.value}%</div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* New Visualization: Scatter Plot for Customer Segments */}
+              <Card className="border border-border bg-card hover:shadow-sm transition-shadow">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <Users className="h-4 w-4 text-[#FF6B47]" />
+                    Customer Segmentation Analysis
+                  </CardTitle>
+                  <CardDescription className="text-xs">MRR vs Health Score Distribution</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Scatter plot */}
+                    <div className="relative h-64 border-l-2 border-b-2 border-border">
+                      <svg className="w-full h-full">
+                        {/* Grid lines */}
+                        {[0, 25, 50, 75, 100].map((percent) => (
+                          <g key={percent}>
+                            <line
+                              x1="0"
+                              y1={`${100 - percent}%`}
+                              x2="100%"
+                              y2={`${100 - percent}%`}
+                              stroke="currentColor"
+                              strokeOpacity="0.1"
+                              strokeWidth="1"
+                            />
+                            <line
+                              x1={`${percent}%`}
+                              y1="0"
+                              x2={`${percent}%`}
+                              y2="100%"
+                              stroke="currentColor"
+                              strokeOpacity="0.1"
+                              strokeWidth="1"
+                            />
+                          </g>
+                        ))}
+
+                        {/* Data points */}
+                        {customers.slice(0, 30).map((customer, idx) => {
+                          const x = (customer.healthScore / 100) * 100
+                          const y = 100 - (Math.min(customer.mrr, 10000) / 10000) * 100
+                          const color = customer.healthScore >= 80 ? '#10B981' :
+                                       customer.healthScore >= 60 ? '#F59E0B' : '#EF4444'
+
+                          return (
+                            <circle
+                              key={idx}
+                              cx={`${x}%`}
+                              cy={`${y}%`}
+                              r="5"
+                              fill={color}
+                              opacity="0.7"
+                              className="hover:opacity-100 hover:r-7 transition-all cursor-pointer"
+                            >
+                              <title>{customer.name}: Health {customer.healthScore}, MRR ${customer.mrr}</title>
+                            </circle>
+                          )
+                        })}
+                      </svg>
+
+                      {/* Axis labels */}
+                      <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-muted-foreground font-medium">
+                        Health Score →
+                      </div>
+                      <div className="absolute top-1/2 -left-16 transform -translate-y-1/2 -rotate-90 text-xs text-muted-foreground font-medium">
+                        MRR →
+                      </div>
+                    </div>
+
+                    {/* Legend */}
+                    <div className="flex justify-center gap-6 pt-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-[#10B981] rounded-full" />
+                        <span className="text-xs font-medium text-foreground">Healthy (80+)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-[#F59E0B] rounded-full" />
+                        <span className="text-xs font-medium text-foreground">At Risk (60-79)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-[#EF4444] rounded-full" />
+                        <span className="text-xs font-medium text-foreground">Critical (&lt;60)</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* New Visualization: Stacked Bar Chart for Tier Comparison */}
+              <Card className="border border-border bg-card hover:shadow-sm transition-shadow">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-[#FF6B47]" />
+                    Customer Tier Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Summary */}
+                    <div className="grid grid-cols-3 gap-3">
+                      {['Enterprise', 'Mid-Market', 'SMB'].map((tier, idx) => {
+                        const tierCustomers = customers.filter(c => c.tier === tier)
+                        const colors = ['#FF6B47', '#10B981', '#7c3aed']
+                        return (
+                          <div key={tier} className="text-center p-3 rounded-lg" style={{ backgroundColor: `${colors[idx]}15` }}>
+                            <div className="text-2xl font-bold" style={{ color: colors[idx] }}>{tierCustomers.length}</div>
+                            <div className="text-xs text-muted-foreground mt-1">{tier}</div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Stacked bars */}
+                    <div className="space-y-4">
+                      {['Active', 'At Risk', 'Onboarding'].map((status) => {
+                        const statusCustomers = customers.filter(c => c.status === status)
+                        const enterprise = statusCustomers.filter(c => c.tier === 'Enterprise').length
+                        const midMarket = statusCustomers.filter(c => c.tier === 'Mid-Market').length
+                        const smb = statusCustomers.filter(c => c.tier === 'SMB').length
+                        const total = statusCustomers.length || 1
+
+                        return (
+                          <div key={status} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium text-foreground">{status}</span>
+                              <span className="text-xs text-muted-foreground">{total} customers</span>
+                            </div>
+                            <div className="h-8 flex rounded-lg overflow-hidden">
+                              {enterprise > 0 && (
+                                <div
+                                  className="bg-[#FF6B47] flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer"
+                                  style={{ width: `${(enterprise / total) * 100}%` }}
+                                  title={`Enterprise: ${enterprise}`}
+                                >
+                                  {enterprise > 0 && <span className="text-xs font-semibold text-white">{enterprise}</span>}
+                                </div>
+                              )}
+                              {midMarket > 0 && (
+                                <div
+                                  className="bg-[#10B981] flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer"
+                                  style={{ width: `${(midMarket / total) * 100}%` }}
+                                  title={`Mid-Market: ${midMarket}`}
+                                >
+                                  {midMarket > 0 && <span className="text-xs font-semibold text-white">{midMarket}</span>}
+                                </div>
+                              )}
+                              {smb > 0 && (
+                                <div
+                                  className="bg-[#7c3aed] flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer"
+                                  style={{ width: `${(smb / total) * 100}%` }}
+                                  title={`SMB: ${smb}`}
+                                >
+                                  {smb > 0 && <span className="text-xs font-semibold text-white">{smb}</span>}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Legend */}
+                    <div className="flex justify-center gap-4 pt-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-[#FF6B47] rounded-sm" />
+                        <span className="text-xs font-medium text-foreground">Enterprise</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-[#10B981] rounded-sm" />
+                        <span className="text-xs font-medium text-foreground">Mid-Market</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-[#7c3aed] rounded-sm" />
+                        <span className="text-xs font-medium text-foreground">SMB</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Widget Grid (Optional - can be toggled) */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {activeWidgets.filter((w) => w.enabled).map((widget) => {

@@ -15,8 +15,8 @@ interface ChatVisualizationsDynamicProps {
 }
 
 // Shimmer Skeleton Component
-const ShimmerSkeleton = ({ className = "" }) => (
-  <div className={`animate-pulse ${className}`}>
+const ShimmerSkeleton = ({ className = "", style }: { className?: string; style?: React.CSSProperties }) => (
+  <div className={`animate-pulse ${className}`} style={style}>
     <div className="h-full w-full bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded animate-shimmer" />
   </div>
 )

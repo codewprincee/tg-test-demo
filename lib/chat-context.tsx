@@ -18,6 +18,9 @@ export interface Conversation {
   messages: Message[]
   createdAt: Date
   updatedAt: Date
+  isPinned?: boolean
+  messageCount?: number
+  tags?: string[]
 }
 
 interface ChatContextType {
@@ -25,6 +28,8 @@ interface ChatContextType {
   currentConversationId: string | null
   setConversations: React.Dispatch<React.SetStateAction<Conversation[]>>
   setCurrentConversationId: React.Dispatch<React.SetStateAction<string | null>>
+  updateConversation: (id: string, updates: Partial<Conversation>) => void
+  deleteConversation: (id: string) => void
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
@@ -57,8 +62,34 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }
   }, [conversations])
 
+  // Update a specific conversation
+  const updateConversation = (id: string, updates: Partial<Conversation>) => {
+    setConversations(prev =>
+      prev.map(conv =>
+        conv.id === id
+          ? { ...conv, ...updates, updatedAt: new Date() }
+          : conv
+      )
+    )
+  }
+
+  // Delete a conversation
+  const deleteConversation = (id: string) => {
+    setConversations(prev => prev.filter(conv => conv.id !== id))
+    if (currentConversationId === id) {
+      setCurrentConversationId(null)
+    }
+  }
+
   return (
-    <ChatContext.Provider value={{ conversations, currentConversationId, setConversations, setCurrentConversationId }}>
+    <ChatContext.Provider value={{
+      conversations,
+      currentConversationId,
+      setConversations,
+      setCurrentConversationId,
+      updateConversation,
+      deleteConversation
+    }}>
       {children}
     </ChatContext.Provider>
   )
