@@ -3,15 +3,10 @@
 import { useState, useEffect, useRef, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Send, Sparkles, Clock, Volume2, VolumeX } from "lucide-react"
+import { Sparkles, Clock } from "lucide-react"
 import { generateChatResponse, generateGeminiResponseStream } from "@/lib/ai-responses"
-import { calculateTotalMRR, calculateAverageHealthScore, getAtRiskCustomers } from "@/lib/demo-data"
 import { useChatContext } from "@/lib/chat-context"
-import { ChatModeSwitcher, type ChatMode } from "@/components/chat-mode-switcher"
-import { ChatVisualizationsDynamic } from "@/components/chat-visualizations-dynamic"
-import { ChatAgent } from "@/components/chat-agent"
-import { parseResponseForVisualizations, type VisualizationData } from "@/lib/visualization-generator"
+import { parseResponseForVisualizations } from "@/lib/visualization-generator"
 
 interface Message {
   id: string
@@ -57,10 +52,24 @@ function generateConversationTitle(firstMessage: string): string {
 }
 
 const suggestedPrompts = [
-  "Which account is currently facing the most API errors and why?",
-  "Give me a summary of account health across all customers and highlight churn risk for the last quarter",
-  "Tell me top 10 accounts by most usage and least usage and write an action plan for the next quarter",
-  "Which product component has introduced the most bugs in the last quarter across all accounts?",
+  {
+    title: "How's my campaign?",
+    description: "Get a quick overview of your campaign's performance, including reach, engagement, and ROI.",
+    action: "View Report",
+    icon: "📊"
+  },
+  {
+    title: "Any spend issues?",
+    description: "Identify sudden spikes or dips in ad spend and get suggestions to optimize your budget.",
+    action: "Analyze Budget",
+    icon: "💰"
+  },
+  {
+    title: "Which ads work best?",
+    description: "See the top-performing ads based on clicks, conversions, and engagement to refine your strategy.",
+    action: "View Insights",
+    icon: "🎯"
+  },
 ]
 
 const FormattedText = ({ content }: { content: string }) => {
@@ -125,14 +134,11 @@ function ChatPageContent() {
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isStreaming, setIsStreaming] = useState(false)
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false)
-  const [chatMode, setChatMode] = useState<ChatMode>("chat")
-  const [visualizationContext, setVisualizationContext] = useState<string>("")
+  const [showAnalyticsPanel, setShowAnalyticsPanel] = useState(true)
   const initialLoadDone = useRef(false)
   const isLoadingConversation = useRef(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   // Sync URL with currentConversationId on mount
   useEffect(() => {
@@ -217,30 +223,6 @@ function ChatPageContent() {
     }
   }, [messages, currentConversationId, setConversations])
 
-  // Initialize audio
-  useEffect(() => {
-    audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3")
-    audioRef.current.loop = true
-    audioRef.current.volume = 0.12
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current = null
-      }
-    }
-  }, [])
-
-  const toggleMusic = () => {
-    if (audioRef.current) {
-      if (isMusicPlaying) {
-        audioRef.current.pause()
-      } else {
-        audioRef.current.play().catch(console.error)
-      }
-      setIsMusicPlaying(!isMusicPlaying)
-    }
-  }
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
@@ -248,20 +230,6 @@ function ChatPageContent() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
-
-  // Update visualization context when messages change
-  useEffect(() => {
-    if (messages.length > 0) {
-      // Get the last few messages for context
-      const recentMessages = messages.slice(-3)
-      const context = recentMessages
-        .map((m) => `${m.role === "user" ? "User" : "AI"}: ${m.content}`)
-        .join("\n\n")
-      setVisualizationContext(context)
-    }
-  }, [messages])
-
-  // Streaming replaces the typing effect - no longer needed
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return
@@ -410,105 +378,133 @@ function ChatPageContent() {
     textareaRef.current?.focus()
   }
 
-  // Render agent mode separately (full screen)
-  if (chatMode === "agent") {
-    return <ChatAgent messageCount={messages.length} onModeChange={setChatMode} />
-  }
+  const userName = "Mohab"
+  const currentHour = new Date().getHours()
+  const greeting = currentHour < 12 ? "Good Morning" : currentHour < 18 ? "Good Afternoon" : "Good Evening"
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      {/* Header with Mode Switcher */}
-      <div className="flex items-center justify-between px-8 py-4 border-b border-slate-200 bg-white">
-        <ChatModeSwitcher currentMode={chatMode} onModeChange={setChatMode} messageCount={messages.length} />
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleMusic}
-            className="h-9 w-9 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-            title={isMusicPlaying ? "Pause music" : "Play music"}
-          >
-            {isMusicPlaying ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-          </Button>
-        </div>
-      </div>
+    <div className="flex flex-col h-full bg-gradient-to-b from-slate-50/30 to-white">
 
       {/* Split View: Chat + Visualizations */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Side: Chat Messages */}
         <div
           className={`flex flex-col bg-gradient-to-b from-white to-slate-50/30 transition-all duration-300 ${
-            chatMode === "visualizations" ? "w-1/2 border-r border-slate-200" : "w-full"
+            messages.length > 1 && showAnalyticsPanel ? "w-1/2 border-r border-slate-200" : "w-full"
           }`}
         >
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-8 py-10">
+        <div className="mx-auto px-8 py-10">
           {/* Welcome Section - Only shown when chat is empty */}
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center  space-y-8">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center mx-auto shadow-lg">
-                  <Sparkles className="h-8 w-8 text-white" />
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-10">
+              <div className="text-center space-y-3">
+                <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-2">
+                  <Sparkles className="h-7 w-7 text-slate-600" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-slate-900 mb-2">AI Customer Success Assistant</h2>
-                  <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                    Get instant insights on customer health, support tickets, revenue trends, and engagement analytics
+                  <h2 className="text-3xl font-semibold text-slate-900 mb-2">{greeting}, {userName}</h2>
+                  <p className="text-base text-slate-500">
+                    Hey there! What can I do for your campaigns today?
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="space-y-8">
-            {messages.map((message) => (
+          <div className="space-y-6">
+            {messages.map((message, idx) => (
               <div key={message.id} className="animate-in fade-in slide-in-from-bottom-3 duration-500">
                 {message.role === "assistant" ? (
-                  <div className="flex justify-start">
-                    <div className="max-w-[85%] space-y-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                          <Sparkles className="h-4 w-4 text-white" />
-                        </div>
-                        <div>
-                          <span className="text-sm font-semibold text-slate-900">AI Assistant</span>
-                          <p className="text-xs text-slate-500">Just now</p>
+                  <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm max-w-2xl">
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                        <Sparkles className="h-4 w-4 text-slate-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-slate-900">{idx === 0 ? "EVA AI" : "Bella AI"}</span>
+                          <span className="text-xs text-slate-400">2:03 PM</span>
                         </div>
                       </div>
-                      <div className="pl-11">
-                        {!message.content ? (
-                          <div className="py-2">
-                            <TypingIndicator />
-                          </div>
-                        ) : (
+                    </div>
+
+                    <div className="space-y-4">
+                      {!message.content ? (
+                        <div className="py-2">
+                          <TypingIndicator />
+                        </div>
+                      ) : (
+                        <>
                           <FormattedText content={message.content} />
-                        )}
-                      </div>
+
+                          {/* PDF Attachment - show for first message */}
+                          {idx === 0 && (
+                            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg border border-slate-200 mt-4">
+                              <div className="w-10 h-10 rounded bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
+                                <span className="text-xs font-bold text-slate-600">PDF</span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-slate-900 truncate">Tech design requirements.pdf</p>
+                                <p className="text-xs text-slate-500">200 KB – PDF</p>
+                              </div>
+                              <button className="p-2 hover:bg-slate-200 rounded-lg transition-colors flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600">
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                  <polyline points="7 10 12 15 17 10"/>
+                                  <line x1="12" x2="12" y1="15" y2="3"/>
+                                </svg>
+                              </button>
+                            </div>
+                          )}
+
+                          {/* View Full Analytics button - show for last AI message */}
+                          {idx === messages.filter(m => m.role === "assistant").length - 1 && messages.length > 1 && (
+                            <button
+                              onClick={() => setShowAnalyticsPanel(true)}
+                              className="mt-4 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                            >
+                              View Full Analytics
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+                      <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="Refresh">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600">
+                          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                        </svg>
+                      </button>
+                      <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="Copy">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600">
+                          <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                        </svg>
+                      </button>
+                      <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="Share">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600">
+                          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                          <polyline points="16 6 12 2 8 6"/>
+                          <line x1="12" x2="12" y1="2" y2="15"/>
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-end">
-                    <div className="max-w-[85%] space-y-3">
-                      <div className="flex items-center gap-3 justify-end">
-                        <div>
-                          <span className="text-sm font-semibold text-slate-900">You</span>
-                          <p className="text-xs text-slate-500 text-right">Just now</p>
-                        </div>
-                        <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
-                          <img
-                            src="https://media.licdn.com/dms/image/v2/D5603AQEaxeuVcHNhYw/profile-displayphoto-shrink_400_400/B56ZSO693KGoAo-/0/1737564610636?e=1764201600&v=beta&t=2SrTyhomkp0_wRDMSx5_aL6y4MLjrd3XKK6wFQOHZHM"
-                            alt="User profile"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
+                  <div className="flex items-start gap-3 max-w-2xl ml-auto">
+                    <div className="flex-1 text-right">
+                      <div className="flex items-center justify-end gap-2 mb-2">
+                        <span className="text-sm font-semibold text-slate-900">Mohab</span>
+                        <span className="text-xs text-slate-400">2:02 PM</span>
                       </div>
-                      <div className="pr-11">
-                        <div className="bg-blue-600 text-white px-5 py-3 rounded-2xl rounded-tr-sm">
-                          <p className="text-base leading-[1.7]">{message.content}</p>
-                        </div>
-                      </div>
+                      <p className="text-sm text-slate-700">{message.content}</p>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center flex-shrink-0 text-sm font-semibold text-slate-700">
+                      M
                     </div>
                   </div>
                 )}
@@ -537,20 +533,37 @@ function ChatPageContent() {
 
           {/* Suggested Prompts - Only shown when chat is empty */}
           {messages.length === 0 && (
-            <div className="max-w-4xl mx-auto space-y-6 mt-8">
-              <h3 className="text-sm font-semibold text-slate-600 text-center">Try asking about...</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mx-auto space-y-6 mt-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {suggestedPrompts.map((prompt, idx) => (
-                  <button
+                  <div
                     key={idx}
-                    onClick={() => handlePromptClick(prompt)}
-                    className="group text-left px-6 py-5 rounded-2xl border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition-all text-base text-slate-700 hover:text-blue-700 leading-relaxed shadow-sm hover:shadow-lg"
+                    className="group bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => handlePromptClick(prompt.title)}
                   >
-                    <div className="flex items-start gap-3">
-                      <Sparkles className="h-5 w-5 text-slate-400 group-hover:text-blue-600 mt-0.5 flex-shrink-0 transition-colors" />
-                      <span className="font-medium">{prompt}</span>
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-xl flex-shrink-0">
+                        {prompt.icon}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-base font-semibold text-slate-900 mb-2">{prompt.title}</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          {prompt.description}
+                        </p>
+                      </div>
                     </div>
-                  </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg h-9"
+                    >
+                      {prompt.action}
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-auto">
+                        <path d="M5 12h14"/>
+                        <path d="m12 5 7 7-7 7"/>
+                      </svg>
+                    </Button>
+                  </div>
                 ))}
               </div>
             </div>
@@ -559,56 +572,244 @@ function ChatPageContent() {
       </div>
 
           {/* Input Area */}
-          <div className="border-t border-slate-200 bg-white/80 backdrop-blur-sm">
-            <div className="max-w-5xl mx-auto px-8 py-6">
-          <div className="relative">
-            <Textarea
-              ref={textareaRef}
+          <div className="border-t border-slate-100 bg-white">
+            <div className="mx-auto px-8 py-5">
+          <div className="relative flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex-shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14"/>
+                <path d="M5 12h14"/>
+              </svg>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex-shrink-0"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                <line x1="9" x2="9.01" y1="9" y2="9"/>
+                <line x1="15" x2="15.01" y1="9" y2="9"/>
+              </svg>
+            </Button>
+            <input
+              ref={textareaRef as any}
               value={input}
-              onChange={(e) => {
-                setInput(e.target.value)
-                e.target.style.height = "60px"
-                e.target.style.height = Math.min(e.target.scrollHeight, 200) + "px"
-              }}
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask me anything about your customers, analytics, or insights..."
+              placeholder="Write a message here..."
               disabled={isLoading}
-              className="min-h-[60px] w-full resize-none rounded-2xl border-2 border-slate-200 bg-white px-6 py-4 pr-16 text-base leading-relaxed placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
-              rows={1}
+              className="flex-1 h-10 resize-none border-0 bg-transparent px-2 text-sm placeholder:text-slate-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <Button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="absolute right-2.5 bottom-2.5 h-11 w-11 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed p-0 transition-all shadow-sm hover:shadow-md"
+              size="icon"
+              className="h-9 w-9 rounded-full bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed p-0 transition-all flex-shrink-0"
             >
               {isLoading ? (
-                <Clock className="h-5 w-5 animate-spin" />
+                <Clock className="h-4 w-4 animate-spin" />
               ) : (
-                <Send className="h-5 w-5" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m5 12 7-7 7 7"/>
+                  <path d="M12 19V5"/>
+                </svg>
               )}
             </Button>
           </div>
-              <p className="text-xs text-slate-500 mt-4 text-center font-medium">
-                Press <kbd className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-600">Enter</kbd> to send • <kbd className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-600">Shift + Enter</kbd> for new line
-              </p>
             </div>
           </div>
         </div>
         {/* End Left Side */}
 
-        {/* Right Side: Visualizations */}
-        {chatMode === "visualizations" && (
-          <div className="w-1/2 bg-white overflow-hidden">
-            <ChatVisualizationsDynamic
-              messageCount={messages.length}
-              conversationContext={visualizationContext}
-              visualizations={
-                messages.length > 0 && messages[messages.length - 1].role === "assistant"
-                  ? messages[messages.length - 1].visualizationData
-                  : undefined
-              }
-              isLoading={isLoading}
-            />
+        {/* Right Side: Campaign Performance Overview */}
+        {messages.length > 1 && showAnalyticsPanel && (
+          <div className="w-1/2 bg-white border-l border-slate-200 overflow-y-auto">
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-slate-900">Campaign Performance Overview</h2>
+                <button
+                  onClick={() => setShowAnalyticsPanel(false)}
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                  title="Close panel"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600">
+                    <path d="M18 6 6 18"/>
+                    <path d="m6 6 12 12"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Summary Stats */}
+              <div className="mb-8">
+                <h3 className="text-sm font-semibold text-slate-900 mb-4">Summary Stats</h3>
+                <div className="grid grid-cols-3 gap-4">
+                  {/* Total Ad Spend */}
+                  <div className="border border-slate-200 rounded-lg p-4">
+                    <p className="text-xs text-slate-600 mb-2">Total Ad Spend</p>
+                    <div className="flex items-end justify-between">
+                      <span className="text-xl font-bold text-slate-900">$12,500</span>
+                      <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
+                        ↑ 8%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Impressions */}
+                  <div className="border border-slate-200 rounded-lg p-4">
+                    <p className="text-xs text-slate-600 mb-2">Impressions</p>
+                    <div className="flex items-end justify-between">
+                      <span className="text-xl font-bold text-slate-900">1.2M</span>
+                      <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
+                        ↑ 8%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Clicks */}
+                  <div className="border border-slate-200 rounded-lg p-4">
+                    <p className="text-xs text-slate-600 mb-2">Clicks</p>
+                    <div className="flex items-end justify-between">
+                      <span className="text-xl font-bold text-slate-900">86,400</span>
+                      <span className="text-sm font-semibold text-red-600 flex items-center gap-1">
+                        ↓ 2.5%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* CRT */}
+                  <div className="border border-slate-200 rounded-lg p-4">
+                    <p className="text-xs text-slate-600 mb-2">CRT</p>
+                    <div className="flex items-end justify-between">
+                      <span className="text-xl font-bold text-slate-900">7.2%</span>
+                      <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
+                        ↑ 8%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Conversions */}
+                  <div className="border border-slate-200 rounded-lg p-4">
+                    <p className="text-xs text-slate-600 mb-2">Conversions</p>
+                    <div className="flex items-end justify-between">
+                      <span className="text-xl font-bold text-slate-900">4,320</span>
+                      <span className="text-sm font-semibold text-red-600 flex items-center gap-1">
+                        ↓ 2.5%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* ROAS */}
+                  <div className="border border-slate-200 rounded-lg p-4">
+                    <p className="text-xs text-slate-600 mb-2">ROAS</p>
+                    <div className="flex items-end justify-between">
+                      <span className="text-xl font-bold text-slate-900">3.8X</span>
+                      <span className="text-sm font-semibold text-emerald-600 flex items-center gap-1">
+                        ↑ 8%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visual Breakdown - Radar Chart */}
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 mb-4">Visual Breakdown</h3>
+                <div className="border border-slate-200 rounded-lg p-6">
+                  {/* Radar Chart */}
+                  <div className="relative h-80 flex items-center justify-center">
+                    <svg viewBox="0 0 400 400" className="w-full h-full">
+                      {/* Grid circles */}
+                      <circle cx="200" cy="200" r="150" fill="none" stroke="#e2e8f0" strokeWidth="1" opacity="0.3" />
+                      <circle cx="200" cy="200" r="100" fill="none" stroke="#e2e8f0" strokeWidth="1" opacity="0.3" />
+                      <circle cx="200" cy="200" r="50" fill="none" stroke="#e2e8f0" strokeWidth="1" opacity="0.3" />
+
+                      {/* Axis lines */}
+                      <line x1="200" y1="50" x2="200" y2="200" stroke="#e2e8f0" strokeWidth="1" opacity="0.3" />
+                      <line x1="330" y1="125" x2="200" y2="200" stroke="#e2e8f0" strokeWidth="1" opacity="0.3" />
+                      <line x1="330" y1="275" x2="200" y2="200" stroke="#e2e8f0" strokeWidth="1" opacity="0.3" />
+                      <line x1="70" y1="275" x2="200" y2="200" stroke="#e2e8f0" strokeWidth="1" opacity="0.3" />
+                      <line x1="70" y1="125" x2="200" y2="200" stroke="#e2e8f0" strokeWidth="1" opacity="0.3" />
+
+                      {/* Series 1 - Pink */}
+                      <polygon
+                        points="200,80 280,140 280,260 200,320 120,260"
+                        fill="#ec4899"
+                        fillOpacity="0.2"
+                        stroke="#ec4899"
+                        strokeWidth="2"
+                      />
+
+                      {/* Series 2 - Blue */}
+                      <polygon
+                        points="200,100 260,150 260,250 200,300 140,250"
+                        fill="#3b82f6"
+                        fillOpacity="0.2"
+                        stroke="#3b82f6"
+                        strokeWidth="2"
+                      />
+
+                      {/* Series 3 - Purple */}
+                      <polygon
+                        points="200,90 270,145 270,255 200,310 130,255"
+                        fill="#8b5cf6"
+                        fillOpacity="0.2"
+                        stroke="#8b5cf6"
+                        strokeWidth="2"
+                      />
+
+                      {/* Day labels */}
+                      <text x="200" y="40" textAnchor="middle" className="text-xs fill-slate-600 font-medium">Mon</text>
+                      <text x="345" y="130" textAnchor="start" className="text-xs fill-slate-600 font-medium">Tue</text>
+                      <text x="345" y="280" textAnchor="start" className="text-xs fill-slate-600 font-medium">Wed</text>
+                      <text x="55" y="280" textAnchor="end" className="text-xs fill-slate-600 font-medium">Sat</text>
+                      <text x="55" y="130" textAnchor="end" className="text-xs fill-slate-600 font-medium">Sun</text>
+
+                      {/* Scale labels */}
+                      <text x="210" y="150" className="text-xs fill-slate-400">200</text>
+                      <text x="210" y="100" className="text-xs fill-slate-400">400</text>
+                      <text x="305" y="205" className="text-xs fill-slate-400">600</text>
+                      <text x="280" y="205" className="text-xs fill-slate-400">800</text>
+                      <text x="250" y="80" className="text-xs fill-slate-400">1,000</text>
+                    </svg>
+                  </div>
+
+                  {/* Legend */}
+                  <div className="flex items-center justify-end gap-6 mt-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-pink-500"></div>
+                      <span className="text-xs text-slate-600">Series 1</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <span className="text-xs text-slate-600">Series 2</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                      <span className="text-xs text-slate-600">Series 3</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between mt-4">
+                  <p className="text-xs text-slate-500">Last edit: few seconds ago</p>
+                  <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" x2="12" y1="15" y2="3"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

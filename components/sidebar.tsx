@@ -81,10 +81,10 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse, onSele
         onClick={onClose}
       />
 
-      {/* Sidebar */}
+      {/* Sidebar - Port.io inspired navy theme */}
       <aside
         className={cn(
-          "fixed lg:relative inset-y-0 left-0 z-50 bg-white border-r border-slate-200 flex flex-col transition-all duration-300 ease-in-out",
+          "fixed lg:relative inset-y-0 left-0 z-50 bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 ease-in-out",
           isCollapsed ? "w-16" : "w-64",
           // On mobile, hide sidebar when not open; on desktop, always visible
           "lg:translate-x-0",
@@ -92,14 +92,18 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse, onSele
         )}
       >
         {/* Toggle Button */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-          {!isCollapsed && <span className="text-sm font-semibold text-slate-900">TouchBase IO</span>}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-sidebar-border">
+          {!isCollapsed && (
+            <span className="text-base font-display font-bold text-sidebar-foreground tracking-tight">
+              TouchBase IO
+            </span>
+          )}
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggleCollapse}
             className={cn(
-              "h-8 w-8 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50",
+              "h-8 w-8 rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent",
               isCollapsed && "mx-auto"
             )}
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -109,7 +113,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse, onSele
         </div>
 
         {/* Main Navigation */}
-        <nav className="px-3 py-4 space-y-1">
+        <nav className="px-3 py-6 space-y-1.5">
           {mainNavItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
@@ -119,15 +123,15 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse, onSele
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full h-10 px-3 font-normal text-sm transition-all",
+                    "w-full h-11 px-3 font-normal text-sm transition-all rounded-md",
                     isCollapsed ? "justify-center" : "justify-start gap-3",
                     isActive
-                      ? "bg-blue-50 text-blue-600 font-medium"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium shadow-sm"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                   )}
                   title={isCollapsed ? item.name : undefined}
                 >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
+                  <Icon className="h-5 w-5 flex-shrink-0" />
                   {!isCollapsed && <span>{item.name}</span>}
                 </Button>
               </Link>
@@ -139,19 +143,21 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse, onSele
         {!isCollapsed && (
           <div className="px-3 py-4 flex-1 overflow-y-auto">
             <div className="flex items-center justify-between px-3 mb-3">
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Recent Chats</h3>
+              <h3 className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider">
+                Recent Chats
+              </h3>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onNewChat}
-                className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                className="h-7 px-2 text-xs text-sidebar-primary hover:text-sidebar-primary-foreground hover:bg-sidebar-primary"
               >
                 New Chat
               </Button>
             </div>
             <div className="space-y-1">
               {recentConversations.length === 0 ? (
-                <p className="px-3 py-2 text-xs text-slate-400 text-center">No conversations yet</p>
+                <p className="px-3 py-2 text-xs text-sidebar-foreground/40 text-center">No conversations yet</p>
               ) : (
                 recentConversations.map((conversation) => {
                   const isActive = currentConversationId === conversation.id
@@ -160,10 +166,10 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse, onSele
                       key={conversation.id}
                       variant="ghost"
                       className={cn(
-                        "w-full justify-start gap-3 h-9 px-3 font-normal text-sm transition-colors",
+                        "w-full justify-start gap-3 h-9 px-3 font-normal text-sm transition-colors rounded-md",
                         isActive
-                          ? "bg-blue-50 text-blue-600 font-medium"
-                          : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium"
+                          : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                       )}
                       onClick={() => onSelectConversation?.(conversation.id)}
                     >
@@ -189,10 +195,10 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse, onSele
                     variant="ghost"
                     size="icon"
                     className={cn(
-                      "w-full h-10 transition-colors",
+                      "w-full h-10 transition-colors rounded-md",
                       isActive
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                     )}
                     onClick={() => onSelectConversation?.(conversation.id)}
                     title={conversation.title}
@@ -206,13 +212,13 @@ export function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse, onSele
         )}
 
         {/* Mobile Close Button */}
-        <div className="lg:hidden px-3 py-3 border-t border-slate-200">
+        <div className="lg:hidden px-3 py-3 border-t border-sidebar-border">
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
             className={cn(
-              "w-full h-10 px-3 text-slate-600 hover:text-slate-900 hover:bg-slate-50",
+              "w-full h-10 px-3 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded-md",
               isCollapsed ? "justify-center" : "justify-start gap-3"
             )}
           >

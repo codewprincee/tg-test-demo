@@ -85,7 +85,6 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
           currentConversationId={currentConversationId}
         />
         <div className="flex flex-col flex-1 overflow-hidden">
-          <Header isSidebarOpen={isSidebarOpen} onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
           <main className="flex-1 overflow-auto">{children}</main>
         </div>
       </div>
